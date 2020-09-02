@@ -54,7 +54,8 @@ class MessagesToPy():
     return everything
 
   def output_header(self):
-    return '''# Garmin FIT message types from profile.xslx in the SDK
+    return '''### THIS FILE IS AUTO-GENERATED ###
+# Garmin FIT message types from profile.xslx in the SDK
 # Version: FitSDKRelease_21.32.00
 import basetypes
 from enum import Enum, unique

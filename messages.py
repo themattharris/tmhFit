@@ -1,11 +1,8 @@
+### THIS FILE IS AUTO-GENERATED ###
 # Garmin FIT message types from profile.xslx in the SDK
 # Version: FitSDKRelease_21.32.00
 import basetypes
-import sys
 from enum import Enum, unique
-
-def name(name):
-  return sys.modules[__name__].__getattribute__(name)
 
 class file_id(Enum):
  # Must be first message in file.

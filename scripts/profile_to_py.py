@@ -29,11 +29,11 @@ class ProfileToPy():
           }
           continue
 
+        # if we're here, we have values
         name = row[2]
         if name[0].isdigit():
           name = "_{}".format(name)
 
-        # if we're here, we have values
         if len(name) > self.MAX_NAME_LEN:
           self.MAX_NAME_LEN = len(name) + 1
         
@@ -45,7 +45,8 @@ class ProfileToPy():
     return everything
 
   def output_header(self):
-    return '''# Garmin FIT message types from profile.xslx in the SDK
+    return '''### THIS FILE IS AUTO-GENERATED ###
+# Garmin FIT message types from profile.xslx in the SDK
 # Version: FitSDKRelease_21.32.00
 import basetypes
 from enum import Enum, unique
