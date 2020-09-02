@@ -1,4 +1,7 @@
 import struct
+import basetypes
+import profile
+import messages
 
 class tmhFit():
   MIN_HEADER_SIZE=12
@@ -8,7 +11,7 @@ class tmhFit():
 
   @staticmethod
   def calculate_crc(crc, byte):
-    # page 14 of Flexible and Interoperable Data Transfer Protocol Rev 2.4
+    # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 14
     crc_table = [
       0x0000, 0xCC01, 0xD801, 0x1400, 0xF001, 0x3C00, 0x2800, 0xE401,
       0xA001, 0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400
@@ -40,7 +43,7 @@ class tmhFit():
     return struct.unpack(fmt, read_bytes)
   
   def read_header(self):
-    # page 14 of Flexible and Interoperable Data Transfer Protocol Rev 2.4
+    # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 14
     # 0   Header Size             Indicates the length of this file header including header size. Min 12
     # 1   Protocol Version        Protocol version number as provided in SDK
     # 2   Profile Version LSB     Profile version number as provided in SDK
@@ -64,7 +67,7 @@ class tmhFit():
     if header_remaining > 0:
       # need to have at least 2 bytes to calculate CRC
       if header_remaining < 2:
-        raise "Invalid file header. expected at least 2 CRC bytes but got less"
+        raise SyntaxException("Invalid file header. expected at least 2 CRC bytes but got less")
       crc_bytes = self.read_bytes_from_pointer(2, "H")
 
       # spec says the header can grow in the future but no definition as to what. read them for now but ignore
@@ -95,7 +98,7 @@ class tmhFit():
       self.read_data()
 
   def read_record_header_byte(self):
-    # page 17 of Flexible and Interoperable Data Transfer Protocol Rev 2.4
+    # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 17
     # Bit   Value         Description
     # 7     0             Normal Header
     # 6     0 or 1        Message Type: 1: Definition, 0: Data
@@ -112,7 +115,7 @@ class tmhFit():
     }
 
   def read_record_definition(self):
-    # page 23 of Flexible and Interoperable Data Transfer Protocol Rev 2.4
+    # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 23
     # Byte                    Description                   Length              Value
     # 0                       Reserved                      1 Byte              0
     # 1                       Architecture                  1 Byte              0 if Little Endian, 1 if Big Endian
@@ -129,16 +132,26 @@ class tmhFit():
     # next 3 bytes tell us the global message number and number of fields
     global_message_num, field_count = self.read_bytes_from_pointer(3, "{}HB".format(endian))
 
+    # lookup the message number in the profile
+    message_type = profile.mesg_num(global_message_num).name
+
+    # lookup the profiles field defs in the messages profile
+    field_defs = messages.name(message_type)
+
     # read the fields
-    # TODO convert global message number
-    print(field_count)
     for i in range(field_count):
-      # page 23 of Flexible and Interoperable Data Transfer Protocol Rev 2.4
+      # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 23
       # Byte   Description
       # 0      Field Definition Num
       # 1      Size
       # 2      Base Type
       field_def_num, field_size, field_base_type = self.read_bytes_from_pointer(3, "{}3B".format(endian))
+
+      field_base_type = basetypes.Field(field_base_type).name
+      if not basetypes.Size[field_base_type].value == field_size:
+        raise ValueError("Invalid field size for {} of type '{}', excepected multiple of {} bytes".format(field_def_num, field_base_type, basetypes.Size[field_base_type]))
+
+      field_def_num = field_defs(field_def_num).name
       print('{}-{}-{}'.format(field_def_num, field_size, field_base_type))
 
 
