@@ -3,8 +3,12 @@ import csv
 import os
 import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import basetypes
+
 class MessagesToPy():
-  DEFAULT_OUTPUT='../messages.py'
+  CONSTS_OUTPUT='../messages.py'
+  META_OUTPUT='../messages_meta.py'
   MAX_NAME_LEN = 0
 
   def parse_csv(self, input_csv):
@@ -58,18 +62,19 @@ class MessagesToPy():
 # Garmin FIT message types from profile.xslx in the SDK
 # Version: FitSDKRelease_21.32.00
 import basetypes
-from enum import Enum, unique
+import profile
 '''
 
-  def write_to_output(self, content_dict, output_py):
+  def write_consts_to_output(self, content_dict, output_py):
     with open(output_py, 'w') as outfile:
       outfile.write(self.output_header())
+      outfile.write('from enum import Enum, unique\n')
 
       for message_type, meta in content_dict.items():
         outfile.write("\n")
         outfile.write('class {}(Enum):\n'.format(message_type))
         if len(meta['comment']) > 0:
-          outfile.write(' # {}\n'.format(meta['comment']))
+          outfile.write('  # {}\n'.format(meta['comment']))
 
         for value in meta['values']:
           row = '  {name:{width}}= {val:8}'.format(name=value['name'], width=self.MAX_NAME_LEN, val=value['defnum'])
@@ -77,20 +82,57 @@ from enum import Enum, unique
             row = '{}# {}'.format(row, value['comment'])
           outfile.write("{}\n".format(row))
 
-  def main(self, input_csv, output_py):
+  def write_meta_to_output(self, content_dict, output_py):
+    with open(output_py, 'w') as outfile:
+      outfile.write(self.output_header())
+
+      for message_type, meta in content_dict.items():
+        outfile.write("\n")
+        outfile.write('class {}():\n'.format(message_type))
+
+        for values in meta['values']:
+          block = "  {} = {{\n".format(values['name'])
+
+          for k, v in values.items():
+            if k in ['defnum', 'name', 'comment']:
+              continue
+
+            if k == 'type':
+              try:
+                if basetypes.Field[v]:
+                  v = 'basetypes.Field.{}'.format(v)
+              except KeyError as e:
+                v = 'profile.{}'.format(v)
+                pass
+            elif k in ['scale', 'offset'] and v.isdigit():
+              v = v
+            # is this one of the nested component types?
+            elif len(v) > 0 and len(v.split(',')) > 0:
+              # TODO handle this better - explode as sub components?
+              v = '"{}"'.format(v.replace("\n", " "))
+            elif len(v) > 0:
+              v = "'{}'".format(v)
+            else:
+              continue
+
+            k = "'{}'".format(k)
+            block = block + "    {:16}: {},\n".format(k, v)
+          block = block + '  }'
+          outfile.write("{}\n".format(block))
+
+  def main(self, input_csv):
     if not os.path.exists(input_csv):
       print("{} does not exist. Quitting".format(input_csv))
 
     content = self.parse_csv(input_csv)
-    self.write_to_output(content, output_py)
+    self.write_consts_to_output(content, self.CONSTS_OUTPUT)
+    self.write_meta_to_output(content, self.META_OUTPUT)
 
 if __name__ == '__main__':
   if len(sys.argv) < 2:
-    print('Usage: {} messages.csv [../messages.py]'.format(os.path.basename(__file__)))
+    print('Usage: {} messages.csv'.format(os.path.basename(__file__)))
     sys.exit(0)
 
   csvin = sys.argv[1]
-  out = sys.argv[2] if len(sys.argv) == 3 else MessagesToPy.DEFAULT_OUTPUT
-  
   mtp = MessagesToPy()
-  mtp.main(csvin, out)
+  mtp.main(csvin)

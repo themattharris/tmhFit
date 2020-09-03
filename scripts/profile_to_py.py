@@ -42,6 +42,29 @@ class ProfileToPy():
           'value': row[3],
           'comment': row[4]
         })
+
+    return self.possibly_add_bool(everything)
+
+  def possibly_add_bool(self, everything):
+    # as of SDK 21.32 the bool field type is still not included in the profile
+    # so check for it, and if it's not present, add it in
+    if not 'bool' in everything:
+      everything['bool'] = {
+        'basetype': 'enum',
+        'values': [
+          {
+            'name': 'false',
+            'value': '0',
+            'comment': "absent from profile. added artificially"
+          },
+          {
+            'name': 'true',
+            'value': '1',
+            'comment': "absent from profile. added artificially"
+          }
+        ]
+      }
+      everything = dict(sorted(everything.items()))
     return everything
 
   def output_header(self):
