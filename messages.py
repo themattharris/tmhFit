@@ -2,10 +2,11 @@
 # Garmin FIT message types from profile.xslx in the SDK
 # Version: FitSDKRelease_21.32.00
 import basetypes
+import profile
 from enum import Enum, unique
 
 class file_id(Enum):
- # Must be first message in file.
+  # Must be first message in file.
   type                                   = 0       
   manufacturer                           = 1       
   product                                = 2       
@@ -670,7 +671,7 @@ class device_info(Enum):
   product_name                           = 27      # Optional free form string to indicate the devices name or model
 
 class training_file(Enum):
- # Corresponds to file_id of workout or course.
+  # Corresponds to file_id of workout or course.
   timestamp                              = 253     
   type                                   = 0       
   manufacturer                           = 1       
@@ -679,7 +680,7 @@ class training_file(Enum):
   time_created                           = 4       
 
 class hrv(Enum):
- # Heart rate variability
+  # Heart rate variability
   time                                   = 0       # Time between beats
 
 class weather_conditions(Enum):
@@ -886,7 +887,7 @@ class course_point(Enum):
   favorite                               = 8       
 
 class segment_id(Enum):
- # Unique Identification data for a segment file
+  # Unique Identification data for a segment file
   name                                   = 0       # Friendly name assigned to segment
   uuid                                   = 1       # UUID of the segment
   sport                                  = 2       # Sport associated with the segment
@@ -898,7 +899,7 @@ class segment_id(Enum):
   selection_type                         = 8       # Indicates how the segment was selected to be sent to the device
 
 class segment_leaderboard_entry(Enum):
- # Unique Identification data for an individual segment leader within a segment file
+  # Unique Identification data for an individual segment leader within a segment file
   message_index                          = 254     
   name                                   = 0       # Friendly name assigned to leader
   type                                   = 1       # Leader classification
@@ -908,7 +909,7 @@ class segment_leaderboard_entry(Enum):
   activity_id_string                     = 5       # String version of the activity_id. 21 characters long, express in decimal
 
 class segment_point(Enum):
- # Navigation and race evaluation point for a segment decribing a point along the segment path and time it took each segment leader to reach that point
+  # Navigation and race evaluation point for a segment decribing a point along the segment path and time it took each segment leader to reach that point
   message_index                          = 254     
   position_lat                           = 1       
   position_long                          = 2       
@@ -1009,7 +1010,7 @@ class segment_lap(Enum):
   avg_flow                               = 87      # The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
 
 class segment_file(Enum):
- # Summary of the unique segment and leaderboard information associated with a segment file. This message is used to compile a segment list file describing all segment files on a device. The segment list file is used when refreshing the contents of a segment file with the latest available leaderboard information.
+  # Summary of the unique segment and leaderboard information associated with a segment file. This message is used to compile a segment list file describing all segment files on a device. The segment list file is used when refreshing the contents of a segment file with the latest available leaderboard information.
   message_index                          = 254     
   file_uuid                              = 1       # UUID of the segment file
   enabled                                = 3       # Enabled state of the segment file
@@ -1158,7 +1159,7 @@ class hr(Enum):
   event_timestamp_12                     = 10      
 
 class stress_level(Enum):
- # Value from 1 to 100 calculated by FirstBeat
+  # Value from 1 to 100 calculated by FirstBeat
   stress_level_value                     = 0       
   stress_level_time                      = 1       # Time stress score was calculated
 
@@ -1219,7 +1220,7 @@ class exd_data_concept_configuration(Enum):
   is_signed                              = 11      
 
 class field_description(Enum):
- # Must be logged before developer field is used
+  # Must be logged before developer field is used
   developer_data_index                   = 0       
   field_definition_number                = 1       
   fit_base_type_id                       = 2       
@@ -1236,7 +1237,7 @@ class field_description(Enum):
   native_field_num                       = 15      
 
 class developer_data_id(Enum):
- # Must be logged before field description
+  # Must be logged before field description
   developer_id                           = 0       
   application_id                         = 1       
   manufacturer_id                        = 2       
