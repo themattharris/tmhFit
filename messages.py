@@ -3,7 +3,12 @@
 # Version: FitSDKRelease_21.32.00
 import basetypes
 import profile
+import sys
 from enum import Enum, unique
+
+def by_name(name):
+  return sys.modules[__name__].__getattribute__(name)
+
 
 class file_id(Enum):
   # Must be first message in file.

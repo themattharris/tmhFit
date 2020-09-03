@@ -65,10 +65,19 @@ import basetypes
 import profile
 '''
 
+  def output_const_header_extra(self):
+    return '''import sys
+from enum import Enum, unique
+
+def by_name(name):
+  return sys.modules[__name__].__getattribute__(name)
+
+'''
+
   def write_consts_to_output(self, content_dict, output_py):
     with open(output_py, 'w') as outfile:
       outfile.write(self.output_header())
-      outfile.write('from enum import Enum, unique\n')
+      outfile.write(self.output_const_header_extra())
 
       for message_type, meta in content_dict.items():
         outfile.write("\n")
