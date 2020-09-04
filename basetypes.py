@@ -59,6 +59,25 @@ class Size(Enum):
   uint64  = 8
   uint64z = 8
 
+class FormatChar(Enum):
+  enum    = 'B'
+  sint8   = 'b'
+  uint8   = 'B'
+  sint16  = 'h'
+  uint16  = 'H'
+  sint32  = 'i'
+  uint32  = 'I'
+  string  = 's'
+  float32 = 'f'
+  float64 = 'd'
+  uint8z  = 'B'
+  uint16z = 'H'
+  uint32z = 'I'
+  byte    = 'B'
+  sint64  = 'q'
+  uint64  = 'Q'
+  uint64z = 'Q'
+
 class EndianAbility(Enum):
   enum    = 0
   sint8   = 0
