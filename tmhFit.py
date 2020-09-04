@@ -5,9 +5,11 @@ import messages
 
 class tmhFit():
   MIN_HEADER_SIZE=12
+  EPOCH = 631065600  # timestamp for UTC 00:00 Dec 31 1989
 
   def __init__(self):
     self._bytepointer = 0
+    self._databytepointer = 0
 
   @staticmethod
   def calculate_crc(crc, byte):
@@ -32,6 +34,10 @@ class tmhFit():
     with open(filename, mode='rb') as file:
       self._content = file.read()
     return self._content
+
+  def read_data_bytes(self, bytes_to_read, fmt, data=None):
+    self._databytepointer = self._databytepointer - bytes_to_read
+    return self.read_bytes_from_pointer(bytes_to_read, fmt)
 
   def read_bytes_from_pointer(self, bytes_to_read, fmt, data=None):
     if data is None:
@@ -75,27 +81,29 @@ class tmhFit():
 
     self._header = {
       'header_size': header_size,
-      'protocol_version': float("%d.%d" % (protocol_version >> 4, protocol_version & ((1 << 4) - 1))),
-      'profile_version': float("%d.%d" % (profile_version / 100, profile_version % 100)),
+      'protocol_version': protocol_version,
+      'profile_version': profile_version,
       'data_size': data_size,
       'data_type': data_type,
       'crc': crc_bytes
     }
+    return self._header
 
   def read_data_records(self):
     self._records = []
-    bytes_left = self._header['data_size']
+    self._databytepointer = self._header['data_size']
 
-    # this is per message
-    # read the record header
-    record_header = self.read_record_header_byte()
-    
-    if record_header['message_type'] is True:
-      # definition record next
-      self.read_record_definition()
-    else:
-      # data record next
-      self.read_data()
+    field_def = {}
+    while self._databytepointer > 0:
+      # read the record header
+      record_header = self.read_record_header_byte()
+      if record_header['message_type'] is True:
+        # definition record next
+        endian, field_def = self.read_record_definition()
+      else:
+        # data record next
+        self._records.append(self.read_data(endian, field_def))
+    return self._records
 
   def read_record_header_byte(self):
     # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 17
@@ -105,7 +113,7 @@ class tmhFit():
     # 5     0 (default)   Message Type Specific
     # 4     0             Reserved
     # 0-3   0-15          Local Message Type
-    record_header = self.read_bytes_from_pointer(1, "B")[0]
+    record_header = self.read_data_bytes(1, "B")[0]
     return {
       'normal_header': bool(record_header & 0x80),
       'message_type': bool(record_header & 0x40),
@@ -126,33 +134,65 @@ class tmhFit():
     # 6 + Fields * 3 - END    Developer Field Definition    3 Bytes/Field
 
     # we need to read the first 2 bytes to know the endian
-    reserved, architecture = self.read_bytes_from_pointer(2, "BB")
+    reserved, architecture = self.read_data_bytes(2, "BB")
     endian = '>' if architecture == 1 else '<'
 
     # next 3 bytes tell us the global message number and number of fields
-    global_message_num, field_count = self.read_bytes_from_pointer(3, "{}HB".format(endian))
+    global_message_num, field_count = self.read_data_bytes(3, "{}HB".format(endian))
 
     # lookup the message number in the profile
     message_type = profile.mesg_num(global_message_num).name
 
     # lookup the profiles field defs in the messages profile
-    field_defs = messages.name(message_type)
+    field_defs = messages.by_name(message_type)
 
     # read the fields
+    definition = []
     for i in range(field_count):
       # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 23
       # Byte   Description
       # 0      Field Definition Num
       # 1      Size
       # 2      Base Type
-      field_def_num, field_size, field_base_type = self.read_bytes_from_pointer(3, "{}3B".format(endian))
+      field_def_num, field_size, field_base_type = self.read_data_bytes(3, "{}3B".format(endian))
 
       field_base_type = basetypes.Field(field_base_type).name
       if not basetypes.Size[field_base_type].value == field_size:
         raise ValueError("Invalid field size for {} of type '{}', excepected multiple of {} bytes".format(field_def_num, field_base_type, basetypes.Size[field_base_type]))
 
-      field_def_num = field_defs(field_def_num).name
-      print('{}-{}-{}'.format(field_def_num, field_size, field_base_type))
+      definition.append({
+        'number': field_def_num,
+        'name': field_defs(field_def_num).name,
+        'bytes': field_size,
+        'type': field_base_type,
+        'pattern': basetypes.FormatChar[field_base_type].value,
+        'endian': endian
+      })
+    return endian, definition
+
+  def read_data(self, endian, definition):
+    record = {}
+
+    pattern = self.definition_to_struct(definition)
+    size = struct.calcsize(pattern)
+    print(definition)
+    fields = [field['name'] for field in definition]
+    data = self.read_data_bytes(size, "{}{}".format(endian, pattern))
+    record = list(zip(fields, data))
+
+    # need to do field validity checks and set values to defaults if invalid
+    # need to set accumulators
+    # need to process developer fields
+    # need units
+    # need to convert based on units
+    print(record)
+    return record
+
+  def definition_to_struct(self, definition):
+    _struct = ""
+    for field in definition:
+      _struct = _struct + field['pattern']
+    return _struct
 
 
 filename = './fixtures/Activity.fit'
