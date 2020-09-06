@@ -1,7 +1,9 @@
+import copy
 import struct
 import basetypes
 import profile
 import messages
+import messages_meta
 
 class tmhFit():
   MIN_HEADER_SIZE=12
@@ -10,6 +12,7 @@ class tmhFit():
   def __init__(self):
     self._bytepointer = 0
     self._databytepointer = 0
+    self._field_definitions = {}
 
   @staticmethod
   def calculate_crc(crc, byte):
@@ -97,32 +100,47 @@ class tmhFit():
     while self._databytepointer > 0:
       # read the record header
       record_header = self.read_record_header_byte()
-      if record_header['message_type'] is True:
-        # definition record next
-        endian, field_def = self.read_record_definition()
+      # message_type 1 is a definition, 0 is a data record. absence of message_type means compressed timestamp
+      if record_header['normal_header'] == 0 and record_header['message_type'] == 1:
+        self.read_record_definition(record_header)
       else:
-        # data record next
-        self._records.append(self.read_data(endian, field_def))
+        self._records.append(self.read_data(record_header))
     return self._records
 
   def read_record_header_byte(self):
-    # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 17
-    # Bit   Value         Description
-    # 7     0             Normal Header
-    # 6     0 or 1        Message Type: 1: Definition, 0: Data
-    # 5     0 (default)   Message Type Specific
-    # 4     0             Reserved
-    # 0-3   0-15          Local Message Type
     record_header = self.read_data_bytes(1, "B")[0]
-    return {
-      'normal_header': bool(record_header & 0x80),
-      'message_type': bool(record_header & 0x40),
-      'message_type_specific': bool(record_header & 0x20),
-      'reserved': record_header & 0x10,
-      'local_message_type': record_header & 0xF
+    header = {
+      'normal_header': (record_header & 0x80) >> 7
     }
 
-  def read_record_definition(self):
+    # normal_header 0 is normal, 1 is a compressed timestamp header
+    if header['normal_header'] == 0:
+      # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 17
+      # Bit   Value         Description
+      # 7     0             Normal Header
+      # 6     0 or 1        Message Type: 1: Definition, 0: Data
+      # 5     0 (default)   Message Type Specific (Developer Data Flag for Normal Header)
+      # 4     0             Reserved
+      # 0-3   0-15          Local Message Type
+      header = {**header, **{
+        'message_type': (record_header & 0x40) >> 6,
+        'message_type_specific': (record_header & 0x20) >> 5,
+        'reserved': (record_header & 0x10) >> 4,
+        'local_message_type': record_header & 0xF
+      }}
+    else:
+      # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 19
+      # Bit   Value         Description
+      # 7     1             Compressed Timestamp Header
+      # 5-6   0-3           Local Message Type
+      # 0-4   0-31          Time Offset (Seconds)
+      header = {**header, **{
+        'local_message_type': (record_header & 0x60) >> 5,
+        'time_offset': record_header & 0x1F
+      }}
+    return header
+
+  def read_record_definition(self, record_header):
     # Ref: Flexible and Interoperable Data Transfer Protocol Rev 2.4, Page 23
     # Byte                    Description                   Length              Value
     # 0                       Reserved                      1 Byte              0
@@ -160,33 +178,66 @@ class tmhFit():
       if not basetypes.Size[field_base_type].value == field_size:
         raise ValueError("Invalid field size for {} of type '{}', excepected multiple of {} bytes".format(field_def_num, field_base_type, basetypes.Size[field_base_type]))
 
+      name = field_defs(field_def_num).name
+      meta = getattr(messages_meta.by_name(message_type), name)
+
       definition.append({
+        'message_type': message_type,
         'number': field_def_num,
-        'name': field_defs(field_def_num).name,
+        'name': name,
         'bytes': field_size,
+        'units': meta['units'] if 'units' in meta.keys() else '',
+        'scale': meta['scale'] if 'scale' in meta.keys() else 1,
+        'offset': meta['offset'] if 'offset' in meta.keys() else 0,
         'type': field_base_type,
         'pattern': basetypes.FormatChar[field_base_type].value,
         'endian': endian
       })
-    return endian, definition
+    self._field_definitions[record_header['local_message_type']] = definition
 
-  def read_data(self, endian, definition):
+  def read_data(self, record_header):
+    definition = self._field_definitions[record_header['local_message_type']]
     record = {}
+
+    # is this a compressed timestamp record?
+    if record_header['normal_header'] == 1:
+      timestamp = definition[0]
+      del definition[0]
 
     pattern = self.definition_to_struct(definition)
     size = struct.calcsize(pattern)
-    print(definition)
+
     fields = [field['name'] for field in definition]
-    data = self.read_data_bytes(size, "{}{}".format(endian, pattern))
+    data = self.read_data_bytes(size, "{}{}".format(definition[0]['endian'], pattern))
     record = list(zip(fields, data))
+
+    if record_header['normal_header'] == 1:
+      definition = [timestamp] + definition
+      definition[0]['value'] = definition[0]['value'] + record_header['time_offset']
+
+    for i in range(len(record)):
+      definition[i]['value'] = record[i][1]
+      definition[i] = self.process_record(definition[i])
 
     # need to do field validity checks and set values to defaults if invalid
     # need to set accumulators
     # need to process developer fields
-    # need units
-    # need to convert based on units
-    print(record)
+    return definition
+
+  def process_record(self, record):
+    # data fields need formatting based on the standards in the SDK
+    if record['type'] == profile.date_time:
+      # adjust timestamp due to custom epoch
+      record['value'] = record['value'] - self.EPOCH
+
+    # scale, then offset
+    if 'scale' in record and record['scale'] > 1:
+      record['value'] = float(record['value']/record['scale'])
+
+    if 'offset' in record and record['offset'] > 0:
+      record['value'] = float(record['value']) - record['offset']
     return record
+
 
   def definition_to_struct(self, definition):
     _struct = ""
@@ -201,3 +252,5 @@ tmhFit_content = tmhFit.open_file(filename)
 
 tmh_header = tmhFit.read_header()
 tmh_records = tmhFit.read_data_records()
+from pprint import pprint
+pprint(tmh_records)
