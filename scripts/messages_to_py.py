@@ -63,24 +63,27 @@ class MessagesToPy():
 # Version: FitSDKRelease_21.32.00
 import basetypes
 import profile
+import sys
 '''
 
-  def output_const_header_extra(self):
-    return '''import sys
-from enum import Enum, unique
+  def output_header_extra(self):
+    return 'from enum import Enum, unique\n'
 
+  def output_header_functions(self):
+    return '''
 def by_name(name):
   return sys.modules[__name__].__getattribute__(name)
-
 '''
 
   def write_consts_to_output(self, content_dict, output_py):
     with open(output_py, 'w') as outfile:
       outfile.write(self.output_header())
-      outfile.write(self.output_const_header_extra())
+      outfile.write(self.output_header_extra())
+      outfile.write(self.output_header_functions())
 
       for message_type, meta in content_dict.items():
         outfile.write("\n")
+        outfile.write("@unique\n")
         outfile.write('class {}(Enum):\n'.format(message_type))
         if len(meta['comment']) > 0:
           outfile.write('  # {}\n'.format(meta['comment']))
@@ -94,6 +97,7 @@ def by_name(name):
   def write_meta_to_output(self, content_dict, output_py):
     with open(output_py, 'w') as outfile:
       outfile.write(self.output_header())
+      outfile.write(self.output_header_functions())
 
       for message_type, meta in content_dict.items():
         outfile.write("\n")

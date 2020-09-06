@@ -9,7 +9,7 @@ from enum import Enum, unique
 def by_name(name):
   return sys.modules[__name__].__getattribute__(name)
 
-
+@unique
 class file_id(Enum):
   # Must be first message in file.
   type                                   = 0       
@@ -20,10 +20,12 @@ class file_id(Enum):
   number                                 = 5       # Only set for files that are not created/erased.
   product_name                           = 8       # Optional free form string to indicate the devices name or model
 
+@unique
 class file_creator(Enum):
   software_version                       = 0       
   hardware_version                       = 1       
 
+@unique
 class timestamp_correlation(Enum):
   timestamp                              = 253     # Whole second part of UTC timestamp at the time the system timestamp was recorded.
   fractional_timestamp                   = 0       # Fractional part of the UTC timestamp at the time the system timestamp was recorded.
@@ -33,21 +35,25 @@ class timestamp_correlation(Enum):
   timestamp_ms                           = 4       # Millisecond part of the UTC timestamp at the time the system timestamp was recorded.
   system_timestamp_ms                    = 5       # Millisecond part of the system timestamp
 
+@unique
 class software(Enum):
   message_index                          = 254     
   version                                = 3       
   part_number                            = 5       
 
+@unique
 class slave_device(Enum):
   manufacturer                           = 0       
   product                                = 1       
 
+@unique
 class capabilities(Enum):
   languages                              = 0       # Use language_bits_x types where x is index of array.
   sports                                 = 1       # Use sport_bits_x types where x is index of array.
   workouts_supported                     = 21      
   connectivity_supported                 = 23      
 
+@unique
 class file_capabilities(Enum):
   message_index                          = 254     
   type                                   = 0       
@@ -56,6 +62,7 @@ class file_capabilities(Enum):
   max_count                              = 3       
   max_size                               = 4       
 
+@unique
 class mesg_capabilities(Enum):
   message_index                          = 254     
   file                                   = 0       
@@ -63,6 +70,7 @@ class mesg_capabilities(Enum):
   count_type                             = 2       
   count                                  = 3       
 
+@unique
 class field_capabilities(Enum):
   message_index                          = 254     
   file                                   = 0       
@@ -70,6 +78,7 @@ class field_capabilities(Enum):
   field_num                              = 2       
   count                                  = 3       
 
+@unique
 class device_settings(Enum):
   active_time_zone                       = 0       # Index into time zone arrays.
   utc_offset                             = 1       # Offset from system time. Required to convert timestamp from system time to UTC.
@@ -96,6 +105,7 @@ class device_settings(Enum):
   tap_interface                          = 134     
   tap_sensitivity                        = 174     # Used to hold the tap threshold setting
 
+@unique
 class user_profile(Enum):
   message_index                          = 254     
   friendly_name                          = 0       
@@ -127,6 +137,7 @@ class user_profile(Enum):
   depth_setting                          = 47      
   dive_count                             = 49      
 
+@unique
 class hrm_profile(Enum):
   message_index                          = 254     
   enabled                                = 0       
@@ -134,6 +145,7 @@ class hrm_profile(Enum):
   log_hrv                                = 2       
   hrm_ant_id_trans_type                  = 3       
 
+@unique
 class sdm_profile(Enum):
   message_index                          = 254     
   enabled                                = 0       
@@ -144,6 +156,7 @@ class sdm_profile(Enum):
   sdm_ant_id_trans_type                  = 5       
   odometer_rollover                      = 7       # Rollover counter that can be used to extend the odometer
 
+@unique
 class bike_profile(Enum):
   message_index                          = 254     
   name                                   = 0       
@@ -178,6 +191,7 @@ class bike_profile(Enum):
   rear_gear                              = 41      # Number of teeth on each gear 0 is innermost
   shimano_di2_enabled                    = 44      
 
+@unique
 class connectivity(Enum):
   bluetooth_enabled                      = 0       # Use Bluetooth for connectivity features
   bluetooth_le_enabled                   = 1       # Use Bluetooth Low Energy for connectivity features
@@ -193,15 +207,18 @@ class connectivity(Enum):
   incident_detection_enabled             = 11      
   grouptrack_enabled                     = 12      
 
+@unique
 class watchface_settings(Enum):
   message_index                          = 254     
   mode                                   = 0       
   layout                                 = 1       
 
+@unique
 class ohr_settings(Enum):
   timestamp                              = 253     
   enabled                                = 0       
 
+@unique
 class zones_target(Enum):
   max_heart_rate                         = 1       
   threshold_heart_rate                   = 2       
@@ -209,37 +226,44 @@ class zones_target(Enum):
   hr_calc_type                           = 5       
   pwr_calc_type                          = 7       
 
+@unique
 class sport(Enum):
   sport                                  = 0       
   sub_sport                              = 1       
   name                                   = 3       
 
+@unique
 class hr_zone(Enum):
   message_index                          = 254     
   high_bpm                               = 1       
   name                                   = 2       
 
+@unique
 class speed_zone(Enum):
   message_index                          = 254     
   high_value                             = 0       
   name                                   = 1       
 
+@unique
 class cadence_zone(Enum):
   message_index                          = 254     
   high_value                             = 0       
   name                                   = 1       
 
+@unique
 class power_zone(Enum):
   message_index                          = 254     
   high_value                             = 1       
   name                                   = 2       
 
+@unique
 class met_zone(Enum):
   message_index                          = 254     
   high_bpm                               = 1       
   calories                               = 2       
   fat_calories                           = 3       
 
+@unique
 class dive_settings(Enum):
   message_index                          = 254     
   name                                   = 0       
@@ -264,6 +288,7 @@ class dive_settings(Enum):
   heart_rate_source_type                 = 19      
   heart_rate_source                      = 20      
 
+@unique
 class dive_alarm(Enum):
   message_index                          = 254     # Index of the alarm
   depth                                  = 0       
@@ -273,12 +298,14 @@ class dive_alarm(Enum):
   sound                                  = 4       
   dive_types                             = 5       
 
+@unique
 class dive_gas(Enum):
   message_index                          = 254     
   helium_content                         = 0       
   oxygen_content                         = 1       
   status                                 = 2       
 
+@unique
 class goal(Enum):
   message_index                          = 254     
   sport                                  = 0       
@@ -294,6 +321,7 @@ class goal(Enum):
   enabled                                = 10      
   source                                 = 11      
 
+@unique
 class activity(Enum):
   timestamp                              = 253     
   total_timer_time                       = 0       # Exclude pauses
@@ -304,6 +332,7 @@ class activity(Enum):
   local_timestamp                        = 5       # timestamp epoch expressed in local time, used to convert activity timestamps to local time 
   event_group                            = 6       
 
+@unique
 class session(Enum):
   message_index                          = 254     # Selected bit is set for the current session.
   timestamp                              = 253     # Sesson end time.
@@ -430,6 +459,7 @@ class session(Enum):
   avg_grit                               = 186     # The grit score estimates how challenging a route could be for a cyclist in terms of time spent going over sharp turns or large grade slopes.
   avg_flow                               = 187     # The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
 
+@unique
 class lap(Enum):
   message_index                          = 254     
   timestamp                              = 253     # Lap end time.
@@ -543,6 +573,7 @@ class lap(Enum):
   avg_grit                               = 153     # The grit score estimates how challenging a route could be for a cyclist in terms of time spent going over sharp turns or large grade slopes.
   avg_flow                               = 154     # The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
 
+@unique
 class length(Enum):
   message_index                          = 254     
   timestamp                              = 253     
@@ -563,6 +594,7 @@ class length(Enum):
   stroke_count                           = 20      # stroke_type enum used as the index
   zone_count                             = 21      # zone number used as the index
 
+@unique
 class record(Enum):
   timestamp                              = 253     
   position_lat                           = 0       
@@ -638,6 +670,7 @@ class record(Enum):
   ebike_assist_mode                      = 119     
   ebike_assist_level_percent             = 120     
 
+@unique
 class event(Enum):
   timestamp                              = 253     
   event                                  = 0       
@@ -655,6 +688,7 @@ class event(Enum):
   radar_threat_level_max                 = 21      # Do not populate directly. Autogenerated by decoder for threat_alert subfield components.
   radar_threat_count                     = 22      # Do not populate directly. Autogenerated by decoder for threat_alert subfield components.
 
+@unique
 class device_info(Enum):
   timestamp                              = 253     
   device_index                           = 0       
@@ -675,6 +709,7 @@ class device_info(Enum):
   source_type                            = 25      
   product_name                           = 27      # Optional free form string to indicate the devices name or model
 
+@unique
 class training_file(Enum):
   # Corresponds to file_id of workout or course.
   timestamp                              = 253     
@@ -684,10 +719,12 @@ class training_file(Enum):
   serial_number                          = 3       
   time_created                           = 4       
 
+@unique
 class hrv(Enum):
   # Heart rate variability
   time                                   = 0       # Time between beats
 
+@unique
 class weather_conditions(Enum):
   timestamp                              = 253     # time of update for current conditions, else forecast time
   weather_report                         = 0       # Current or forecast
@@ -706,6 +743,7 @@ class weather_conditions(Enum):
   high_temperature                       = 13      
   low_temperature                        = 14      
 
+@unique
 class weather_alert(Enum):
   timestamp                              = 253     
   report_id                              = 0       # Unique identifier from GCS report ID string, length is 12
@@ -714,6 +752,7 @@ class weather_alert(Enum):
   severity                               = 3       # Warning, Watch, Advisory, Statement
   type                                   = 4       # Tornado, Severe Thunderstorm, etc.
 
+@unique
 class gps_metadata(Enum):
   timestamp                              = 253     # Whole second part of the timestamp.
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
@@ -725,6 +764,7 @@ class gps_metadata(Enum):
   utc_timestamp                          = 6       # Used to correlate UTC to system time if the timestamp of the message is in system time.  This UTC time is derived from the GPS data.
   velocity                               = 7       # velocity[0] is lon velocity.  Velocity[1] is lat velocity.  Velocity[2] is altitude velocity.
 
+@unique
 class camera_event(Enum):
   timestamp                              = 253     # Whole second part of the timestamp.
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
@@ -732,6 +772,7 @@ class camera_event(Enum):
   camera_file_uuid                       = 2       
   camera_orientation                     = 3       
 
+@unique
 class gyroscope_data(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
@@ -743,6 +784,7 @@ class gyroscope_data(Enum):
   calibrated_gyro_y                      = 6       # Calibrated gyro reading
   calibrated_gyro_z                      = 7       # Calibrated gyro reading
 
+@unique
 class accelerometer_data(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
@@ -757,6 +799,7 @@ class accelerometer_data(Enum):
   compressed_calibrated_accel_y          = 9       # Calibrated accel reading
   compressed_calibrated_accel_z          = 10      # Calibrated accel reading
 
+@unique
 class magnetometer_data(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
@@ -768,12 +811,14 @@ class magnetometer_data(Enum):
   calibrated_mag_y                       = 6       # Calibrated Magnetometer reading
   calibrated_mag_z                       = 7       # Calibrated Magnetometer reading
 
+@unique
 class barometer_data(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
   sample_time_offset                     = 1       # Each time in the array describes the time at which the barometer sample with the corrosponding index was taken. The samples may span across seconds. Array size must match the number of samples in baro_cal
   baro_pres                              = 2       # These are the raw ADC reading. The samples may span across seconds. A conversion will need to be done on this data once read.
 
+@unique
 class three_d_sensor_calibration(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   sensor_type                            = 0       # Indicates which sensor the calibration is for
@@ -783,6 +828,7 @@ class three_d_sensor_calibration(Enum):
   offset_cal                             = 4       # Internal calibration factors, one for each: xy, yx, zx
   orientation_matrix                     = 5       # 3 x 3 rotation matrix (row major)
 
+@unique
 class one_d_sensor_calibration(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   sensor_type                            = 0       # Indicates which sensor the calibration is for
@@ -791,11 +837,13 @@ class one_d_sensor_calibration(Enum):
   level_shift                            = 3       # Level shift value used to shift the ADC value back into range
   offset_cal                             = 4       # Internal Calibration factor
 
+@unique
 class video_frame(Enum):
   timestamp                              = 253     # Whole second part of the timestamp
   timestamp_ms                           = 0       # Millisecond part of the timestamp.
   frame_number                           = 1       # Number of the frame that the timestamp and timestamp_ms correlate to
 
+@unique
 class obdii_data(Enum):
   timestamp                              = 253     # Timestamp message was output
   timestamp_ms                           = 0       # Fractional part of timestamp, added to timestamp
@@ -807,11 +855,13 @@ class obdii_data(Enum):
   start_timestamp                        = 6       # Timestamp of first sample recorded in the message.  Used with time_offset to generate time of each sample
   start_timestamp_ms                     = 7       # Fractional part of start_timestamp
 
+@unique
 class nmea_sentence(Enum):
   timestamp                              = 253     # Timestamp message was output
   timestamp_ms                           = 0       # Fractional part of timestamp, added to timestamp
   sentence                               = 1       # NMEA sentence
 
+@unique
 class aviation_attitude(Enum):
   timestamp                              = 253     # Timestamp message was output
   timestamp_ms                           = 0       # Fractional part of timestamp, added to timestamp
@@ -826,21 +876,25 @@ class aviation_attitude(Enum):
   track                                  = 9       # Track Angle/Heading Range 0 - 2pi
   validity                               = 10      
 
+@unique
 class video(Enum):
   url                                    = 0       
   hosting_provider                       = 1       
   duration                               = 2       # Playback time of video
 
+@unique
 class video_title(Enum):
   message_index                          = 254     # Long titles will be split into multiple parts
   message_count                          = 0       # Total number of title parts
   text                                   = 1       
 
+@unique
 class video_description(Enum):
   message_index                          = 254     # Long descriptions will be split into multiple parts
   message_count                          = 0       # Total number of description parts
   text                                   = 1       
 
+@unique
 class video_clip(Enum):
   clip_number                            = 0       
   start_timestamp                        = 1       
@@ -850,6 +904,7 @@ class video_clip(Enum):
   clip_start                             = 6       # Start of clip in video time
   clip_end                               = 7       # End of clip in video time
 
+@unique
 class set(Enum):
   timestamp                              = 254     # Timestamp of the set
   duration                               = 0       
@@ -863,6 +918,7 @@ class set(Enum):
   message_index                          = 10      
   wkt_step_index                         = 11      
 
+@unique
 class jump(Enum):
   timestamp                              = 253     
   distance                               = 0       
@@ -875,12 +931,14 @@ class jump(Enum):
   speed                                  = 7       
   enhanced_speed                         = 8       
 
+@unique
 class course(Enum):
   sport                                  = 4       
   name                                   = 5       
   capabilities                           = 6       
   sub_sport                              = 7       
 
+@unique
 class course_point(Enum):
   message_index                          = 254     
   timestamp                              = 1       
@@ -891,6 +949,7 @@ class course_point(Enum):
   name                                   = 6       
   favorite                               = 8       
 
+@unique
 class segment_id(Enum):
   # Unique Identification data for a segment file
   name                                   = 0       # Friendly name assigned to segment
@@ -903,6 +962,7 @@ class segment_id(Enum):
   delete_status                          = 7       # Indicates if any segments should be deleted
   selection_type                         = 8       # Indicates how the segment was selected to be sent to the device
 
+@unique
 class segment_leaderboard_entry(Enum):
   # Unique Identification data for an individual segment leader within a segment file
   message_index                          = 254     
@@ -913,6 +973,7 @@ class segment_leaderboard_entry(Enum):
   segment_time                           = 4       # Segment Time (includes pauses)
   activity_id_string                     = 5       # String version of the activity_id. 21 characters long, express in decimal
 
+@unique
 class segment_point(Enum):
   # Navigation and race evaluation point for a segment decribing a point along the segment path and time it took each segment leader to reach that point
   message_index                          = 254     
@@ -922,6 +983,7 @@ class segment_point(Enum):
   altitude                               = 4       # Accumulated altitude along the segment at the described point
   leader_time                            = 5       # Accumualted time each leader board member required to reach the described point. This value is zero for all leader board members at the starting point of the segment.
 
+@unique
 class segment_lap(Enum):
   message_index                          = 254     
   timestamp                              = 253     # Lap end time.
@@ -1014,6 +1076,7 @@ class segment_lap(Enum):
   avg_grit                               = 86      # The grit score estimates how challenging a route could be for a cyclist in terms of time spent going over sharp turns or large grade slopes.
   avg_flow                               = 87      # The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
 
+@unique
 class segment_file(Enum):
   # Summary of the unique segment and leaderboard information associated with a segment file. This message is used to compile a segment list file describing all segment files on a device. The segment list file is used when refreshing the contents of a segment file with the latest available leaderboard information.
   message_index                          = 254     
@@ -1026,6 +1089,7 @@ class segment_file(Enum):
   leader_activity_id_string              = 10      # String version of the activity ID of each leader in the segment file. 21 characters long for each ID, express in decimal
   default_race_leader                    = 11      # Index for the Leader Board entry selected as the default race participant
 
+@unique
 class workout(Enum):
   sport                                  = 4       
   capabilities                           = 5       
@@ -1035,6 +1099,7 @@ class workout(Enum):
   pool_length                            = 14      
   pool_length_unit                       = 15      
 
+@unique
 class workout_session(Enum):
   message_index                          = 254     
   sport                                  = 0       
@@ -1044,6 +1109,7 @@ class workout_session(Enum):
   pool_length                            = 4       
   pool_length_unit                       = 5       
 
+@unique
 class workout_step(Enum):
   message_index                          = 254     
   wkt_step_name                          = 0       
@@ -1061,12 +1127,14 @@ class workout_step(Enum):
   exercise_weight                        = 12      
   weight_display_unit                    = 13      
 
+@unique
 class exercise_title(Enum):
   message_index                          = 254     
   exercise_category                      = 0       
   exercise_name                          = 1       
   wkt_step_name                          = 2       
 
+@unique
 class schedule(Enum):
   manufacturer                           = 0       # Corresponds to file_id of scheduled workout / course.
   product                                = 1       # Corresponds to file_id of scheduled workout / course.
@@ -1076,6 +1144,7 @@ class schedule(Enum):
   type                                   = 5       
   scheduled_time                         = 6       
 
+@unique
 class totals(Enum):
   message_index                          = 254     
   timestamp                              = 253     
@@ -1088,6 +1157,7 @@ class totals(Enum):
   active_time                            = 6       
   sport_index                            = 9       
 
+@unique
 class weight_scale(Enum):
   timestamp                              = 253     
   weight                                 = 0       
@@ -1103,6 +1173,7 @@ class weight_scale(Enum):
   visceral_fat_rating                    = 11      
   user_profile_index                     = 12      # Associates this weight scale message to a user.  This corresponds to the index of the user profile message in the weight scale file.
 
+@unique
 class blood_pressure(Enum):
   timestamp                              = 253     
   systolic_pressure                      = 0       
@@ -1116,6 +1187,7 @@ class blood_pressure(Enum):
   status                                 = 8       
   user_profile_index                     = 9       # Associates this blood pressure message to a user.  This corresponds to the index of the user profile message in the blood pressure file.
 
+@unique
 class monitoring_info(Enum):
   timestamp                              = 253     
   local_timestamp                        = 0       # Use to convert activity timestamps to local time if device does not support time zone and daylight savings time correction.
@@ -1124,6 +1196,7 @@ class monitoring_info(Enum):
   cycles_to_calories                     = 4       # Indexed by activity_type
   resting_metabolic_rate                 = 5       
 
+@unique
 class monitoring(Enum):
   timestamp                              = 253     # Must align to logging interval, for example, time must be 00:00:00 for daily log.
   device_index                           = 0       # Associates this data to device_info message.  Not required for file with single device (sensor).
@@ -1155,6 +1228,7 @@ class monitoring(Enum):
   moderate_activity_minutes              = 33      
   vigorous_activity_minutes              = 34      
 
+@unique
 class hr(Enum):
   timestamp                              = 253     
   fractional_timestamp                   = 0       
@@ -1163,17 +1237,20 @@ class hr(Enum):
   event_timestamp                        = 9       
   event_timestamp_12                     = 10      
 
+@unique
 class stress_level(Enum):
   # Value from 1 to 100 calculated by FirstBeat
   stress_level_value                     = 0       
   stress_level_time                      = 1       # Time stress score was calculated
 
+@unique
 class memo_glob(Enum):
   part_index                             = 250     # Sequence number of memo blocks
   memo                                   = 0       # Block of utf8 bytes
   message_number                         = 1       # Allows relating glob to another mesg  If used only required for first part of each memo_glob
   message_index                          = 2       # Index of external mesg
 
+@unique
 class ant_channel_id(Enum):
   channel_number                         = 0       
   device_type                            = 1       
@@ -1181,6 +1258,7 @@ class ant_channel_id(Enum):
   transmission_type                      = 3       
   device_index                           = 4       
 
+@unique
 class ant_rx(Enum):
   timestamp                              = 253     
   fractional_timestamp                   = 0       
@@ -1189,6 +1267,7 @@ class ant_rx(Enum):
   channel_number                         = 3       
   data                                   = 4       
 
+@unique
 class ant_tx(Enum):
   timestamp                              = 253     
   fractional_timestamp                   = 0       
@@ -1197,12 +1276,14 @@ class ant_tx(Enum):
   channel_number                         = 3       
   data                                   = 4       
 
+@unique
 class exd_screen_configuration(Enum):
   screen_index                           = 0       
   field_count                            = 1       # number of fields in screen
   layout                                 = 2       
   screen_enabled                         = 3       
 
+@unique
 class exd_data_field_configuration(Enum):
   screen_index                           = 0       
   concept_field                          = 1       
@@ -1211,6 +1292,7 @@ class exd_data_field_configuration(Enum):
   display_type                           = 4       
   title                                  = 5       
 
+@unique
 class exd_data_concept_configuration(Enum):
   screen_index                           = 0       
   concept_field                          = 1       
@@ -1224,6 +1306,7 @@ class exd_data_concept_configuration(Enum):
   descriptor                             = 10      
   is_signed                              = 11      
 
+@unique
 class field_description(Enum):
   # Must be logged before developer field is used
   developer_data_index                   = 0       
@@ -1241,6 +1324,7 @@ class field_description(Enum):
   native_mesg_num                        = 14      
   native_field_num                       = 15      
 
+@unique
 class developer_data_id(Enum):
   # Must be logged before field description
   developer_id                           = 0       
@@ -1249,6 +1333,7 @@ class developer_data_id(Enum):
   developer_data_index                   = 3       
   application_version                    = 4       
 
+@unique
 class dive_summary(Enum):
   timestamp                              = 253     
   reference_mesg                         = 0       
@@ -1264,6 +1349,7 @@ class dive_summary(Enum):
   dive_number                            = 10      
   bottom_time                            = 11      
 
+@unique
 class climb_pro(Enum):
   timestamp                              = 253     
   position_lat                           = 0       
