@@ -199,28 +199,15 @@ class tmhFit():
     definition = self._field_definitions[record_header['local_message_type']]
     record = {}
 
-    # is this a compressed timestamp record?
-    if record_header['normal_header'] == 1:
-      timestamp = definition[0]
-      del definition[0]
-
     pattern = self.definition_to_struct(definition)
     size = struct.calcsize(pattern)
 
-
-    # clean this up, we shouldnt need to play with the timestamp removal etc anymore now we're using correct
-    # field definition lookup
     fields = [field['name'] for field in definition]
     data = self.read_data_bytes(size, "{}{}".format(definition[0]['endian'], pattern))
     record = list(zip(fields, data))
 
-    if record_header['normal_header'] == 1:
-      definition = [timestamp] + definition
-      definition[0]['value'] = definition[0]['value'] + record_header['time_offset']
-
-    for i in range(len(record)):
-      definition[i]['value'] = record[i][1]
-      definition[i] = self.process_record(definition[i])
+    for r in record:
+      record['value'] = self.process_record(record['value'])
 
     # need to do field validity checks and set values to defaults if invalid
     # need to set accumulators
