@@ -10,8 +10,8 @@ class tmhFit():
   EPOCH = 631065600  # timestamp for UTC 00:00 Dec 31 1989
 
   def __init__(self):
-    self._bytepointer = 0
-    self._databytepointer = 0
+    self._byte_ptr = 0
+    self._databyte_ptr = 0
     self._field_definitions = {}
 
   @staticmethod
@@ -39,15 +39,15 @@ class tmhFit():
     return self._content
 
   def read_data_bytes(self, bytes_to_read, fmt, data=None):
-    self._databytepointer = self._databytepointer - bytes_to_read
+    self._databyte_ptr = self._databyte_ptr - bytes_to_read
     return self.read_bytes_from_pointer(bytes_to_read, fmt)
 
   def read_bytes_from_pointer(self, bytes_to_read, fmt, data=None):
     if data is None:
       data = self._content
 
-    read_bytes = data[self._bytepointer:self._bytepointer+bytes_to_read]
-    self._bytepointer = self._bytepointer + bytes_to_read
+    read_bytes = data[self._byte_ptr:self._byte_ptr+bytes_to_read]
+    self._byte_ptr = self._byte_ptr + bytes_to_read
 
     return struct.unpack(fmt, read_bytes)
   
@@ -94,10 +94,10 @@ class tmhFit():
 
   def read_data_records(self):
     self._records = []
-    self._databytepointer = self._header['data_size']
+    self._databyte_ptr = self._header['data_size']
 
     field_def = {}
-    while self._databytepointer > 0:
+    while self._databyte_ptr > 0:
       # read the record header
       record_header = self.read_record_header_byte()
       # message_type 1 is a definition, 0 is a data record. absence of message_type means compressed timestamp
@@ -207,6 +207,9 @@ class tmhFit():
     pattern = self.definition_to_struct(definition)
     size = struct.calcsize(pattern)
 
+
+    # clean this up, we shouldnt need to play with the timestamp removal etc anymore now we're using correct
+    # field definition lookup
     fields = [field['name'] for field in definition]
     data = self.read_data_bytes(size, "{}{}".format(definition[0]['endian'], pattern))
     record = list(zip(fields, data))
@@ -252,5 +255,8 @@ tmhFit_content = tmhFit.open_file(filename)
 
 tmh_header = tmhFit.read_header()
 tmh_records = tmhFit.read_data_records()
-from pprint import pprint
-pprint(tmh_records)
+
+for r in tmh_records:
+  for i in r:
+    print("{}: {} {}".format(i['name'], i['value'], i['units']))
+  print("\n")
