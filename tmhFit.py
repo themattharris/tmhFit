@@ -181,18 +181,15 @@ class tmhFit():
       name = field_defs(field_def_num).name
       meta = getattr(messages_meta.by_name(message_type), name)
 
-      definition.append({
+      definition.append({**{
         'message_type': message_type,
         'number': field_def_num,
         'name': name,
         'bytes': field_size,
-        'units': meta['units'] if 'units' in meta.keys() else '',
-        'scale': meta['scale'] if 'scale' in meta.keys() else 1,
-        'offset': meta['offset'] if 'offset' in meta.keys() else 0,
         'type': field_base_type,
         'pattern': basetypes.FormatChar[field_base_type].value,
         'endian': endian
-      })
+      }, **meta})
     self._field_definitions[record_header['local_message_type']] = definition
 
   def read_data(self, record_header):

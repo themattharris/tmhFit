@@ -117,8 +117,13 @@ def by_name(name):
               except KeyError as e:
                 v = 'profile.{}'.format(v)
                 pass
-            elif k in ['scale', 'offset'] and v.isdigit():
-              v = v
+            elif k in ['offset']:
+              v = v if v.isdigit() else 0
+            elif k in ['scale']:
+              v = v if v.isdigit() else 1
+            elif k in ['units']:
+              v = v if len(v) > 0 else ""
+              v = '"{}"'.format(v.replace("\n", " "))
             # is this one of the nested component types?
             elif len(v) > 0 and len(v.split(',')) > 0:
               # TODO handle this better - explode as sub components?
