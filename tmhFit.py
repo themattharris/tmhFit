@@ -196,8 +196,7 @@ class tmhFit():
     self._field_definitions[record_header['local_message_type']] = definition
 
   def read_data(self, record_header):
-    definition = self._field_definitions[record_header['local_message_type']]
-    record = {}
+    definition = copy.deepcopy(self._field_definitions[record_header['local_message_type']])
 
     pattern = self.definition_to_struct(definition)
     size = struct.calcsize(pattern)
@@ -205,9 +204,11 @@ class tmhFit():
     fields = [field['name'] for field in definition]
     data = self.read_data_bytes(size, "{}{}".format(definition[0]['endian'], pattern))
     record = list(zip(fields, data))
+    record = { r[0]: r[1] for r in record }
 
-    for r in record:
-      record['value'] = self.process_record(record['value'])
+    for d in definition:
+      d['value'] = record[d['name']]
+      d = self.process_record(d)
 
     # need to do field validity checks and set values to defaults if invalid
     # need to set accumulators
